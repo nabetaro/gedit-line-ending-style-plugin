@@ -1,0 +1,55 @@
+# Copyright (C) 2010 Daniel Trebbien
+# This file is distributed under the same license as the gedit-line-ending-style package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gedit-line-ending-style-plugin 0.1\n"
+"Report-Msgid-Bugs-To: dtrebbien@gmail.com\n"
+"POT-Creation-Date: 2010-08-21 14:04-0700\n"
+"PO-Revision-Date: 2010-08-21 14:07-0700\n"
+"Last-Translator: Daniel Trebbien <dtrebbien@gmail.com>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: src/line-ending-style.py:44
+msgid "Line Ending Style"
+msgstr "Zeilenendestil"
+
+#: src/line-ending-style.py:47
+msgid "Unix/Linux"
+msgstr "Unix/Linux"
+
+#: src/line-ending-style.py:47
+msgid "Switch to Unix/Linux-style line endings (LF)"
+msgstr "Zu Unix/Linux-Zeilenenden wechseln (ZL)"
+
+#: src/line-ending-style.py:48
+msgid "Mac OS Classic"
+msgstr "Mac OS Classic"
+
+#: src/line-ending-style.py:48
+msgid "Switch to Mac OS Classic-style line endings (CR)"
+msgstr "Zu Mac OS Classic-Zeilenenden wechseln (WR)"
+
+#: src/line-ending-style.py:49
+msgid "Windows"
+msgstr "Windows"
+
+#: src/line-ending-style.py:49
+msgid "Switch to Windows-style line endings (CRLF)"
+msgstr "Zu Windows-Zeilenenden wechseln (WRZL)"
+
+#: src/line-ending-style.py:105
+msgid "LF"
+msgstr "ZL"
+
+#: src/line-ending-style.py:108
+msgid "CR"
+msgstr "WR"
+
+#: src/line-ending-style.py:111
+msgid "CRLF"
+msgstr "WRZL"

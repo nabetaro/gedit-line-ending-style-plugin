@@ -1,0 +1,5 @@
+AUTOMAKE_OPTIONS = foreign
+
+SUBDIRS = po src
+
+ACLOCAL_AMFLAGS = -I m4

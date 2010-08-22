@@ -1,0 +1,9 @@
+_old
+_wiki
+autom4te.cache
+aclocal.m4
+config.cache
+config.log
+config.status
+Makefile
+*~
