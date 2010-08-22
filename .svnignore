@@ -5,5 +5,7 @@ aclocal.m4
 config.cache
 config.log
 config.status
+gedit-line-ending-style-plugin-*.tar.bz2
+gedit-line-ending-style-plugin-*.tar.gz
 Makefile
 *~
