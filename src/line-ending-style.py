@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Line Ending Style, a plugin for Gedit
+# Line Ending Style, a plugin for Gedit (version 2.29.5 or later)
 #
 # Based in part on the Newline Madness plugin by Jeffery To:
 # http://www.thingsthemselves.com/gedit/
