@@ -33,12 +33,12 @@ GEDIT_DOCUMENT_NEWLINE_TYPE_CR_LF = 2
 
 class LineEndingStylePluginUI:
 	PLUGIN_MENU_ITEM_PATH_ROOT = "/ui/MenuBar/FileMenu/FileOps_4/LineEndingStylePluginMenu/"
-	
+
 	NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY = "GeditLineEndingStylePluginUINotifyNewline-TypeHandlerID"
-	
+
 	def __init__(self, window):
 		self.window = window
-	
+
 	def merge(self):
 		action_group = self.action_group = gtk.ActionGroup("GeditLineEndingStylePluginActions")
 		action_group.set_translation_domain("gedit-line-ending-style-plugin")
@@ -50,7 +50,7 @@ class LineEndingStylePluginUI:
 				("LineEndingStylePluginMenuToCRItem", None, action_group.translate_string(N_("Mac OS Classic")), None, action_group.translate_string(N_("Switch to Mac OS Classic-style line endings (CR)")), GEDIT_DOCUMENT_NEWLINE_TYPE_CR),
 				("LineEndingStylePluginMenuToCRLFItem", None, action_group.translate_string(N_("Windows")), None, action_group.translate_string(N_("Switch to Windows-style line endings (CRLF)")), GEDIT_DOCUMENT_NEWLINE_TYPE_CR_LF)
 			], GEDIT_DOCUMENT_NEWLINE_TYPE_LF, lambda action, current: self.set_active_document_newline_type(action.get_current_value()))
-		
+
 		window = self.window
 		manager = window.get_ui_manager()
 		manager.insert_action_group(action_group, -1)
@@ -70,39 +70,39 @@ class LineEndingStylePluginUI:
 				</menubar>
 			</ui>
 			""")
-		
+
 		statusbar = window.get_statusbar()
 		self.sb_frame = gtk.Frame()
 		self.sb_label = gtk.Label()
 		self.sb_frame.add(self.sb_label)
 		statusbar.pack_end(self.sb_frame, False, False)
 		self.sb_frame.show_all()
-		
+
 		doc = window.get_active_document()
 		if doc:
 			self.update_state_per_document(doc)
-		
+
 		self.tab_added_handler_id = window.connect("tab-added", lambda window, tab: self.connect_notify_newline_type_handler(tab.get_document()))
 		self.active_tab_changed_handler_id = window.connect("active-tab-changed", lambda window, tab: self.update_state_per_document(tab.get_document()))
 		self.tab_removed_handler_id = window.connect("tab-removed", lambda window, tab: self.disconnect_notify_newline_type_handler(tab.get_document()))
-		
+
 		for doc in window.get_documents():
 			self.connect_notify_newline_type_handler(doc)
-	
+
 	def connect_notify_newline_type_handler(self, doc):
 		notify_newline_type_handler_id = doc.connect("notify::newline-type", lambda doc, pspec: self.update_state_per_document(doc))
 		doc.set_data(LineEndingStylePluginUI.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, notify_newline_type_handler_id)
-	
+
 	def disconnect_notify_newline_type_handler(self, doc):
 		notify_newline_type_handler_id = doc.get_data(LineEndingStylePluginUI.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY)
 		doc.set_data(LineEndingStylePluginUI.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, None)
 		if notify_newline_type_handler_id != None:
 			doc.disconnect(notify_newline_type_handler_id)
-	
+
 	def update_state_per_document(self, doc):
 		if doc:
 			nl_type = doc.get_property("newline-type")
-			
+
 			next_active_menu_item_name = "LineEndingStylePluginMenuToLFItem"
 			next_sb_label_text = self.action_group.translate_string(N_("LF"))
 			if nl_type == GEDIT_DOCUMENT_NEWLINE_TYPE_CR:
@@ -111,19 +111,19 @@ class LineEndingStylePluginUI:
 			elif nl_type == GEDIT_DOCUMENT_NEWLINE_TYPE_CR_LF:
 				next_active_menu_item_name = "LineEndingStylePluginMenuToCRLFItem"
 				next_sb_label_text = self.action_group.translate_string(N_("CRLF"))
-			
+
 			manager = self.window.get_ui_manager()
 			manager.get_widget(LineEndingStylePluginUI.PLUGIN_MENU_ITEM_PATH_ROOT + next_active_menu_item_name).set_active(True)
 			self.sb_label.set_text(next_sb_label_text)
 			self.sb_label.show()
 		else:
 			self.sb_label.hide()
-	
+
 	def set_active_document_newline_type(self, nl_type):
 		doc = self.window.get_active_document()
 		if doc:
 			doc.set_property("newline-type", nl_type)
-	
+
 	def update_ui(self):
 		doc = self.window.get_active_document()
 		b = doc != None and not doc.get_readonly()
@@ -132,7 +132,7 @@ class LineEndingStylePluginUI:
 		manager.get_widget(LineEndingStylePluginUI.PLUGIN_MENU_ITEM_PATH_ROOT + "LineEndingStylePluginMenuToCRItem").set_sensitive(b)
 		manager.get_widget(LineEndingStylePluginUI.PLUGIN_MENU_ITEM_PATH_ROOT + "LineEndingStylePluginMenuToCRLFItem").set_sensitive(b)
 		self.update_state_per_document(doc)
-	
+
 	def unmerge(self):
 		window = self.window
 		for doc in window.get_documents():
@@ -149,20 +149,20 @@ class LineEndingStylePluginUI:
 
 class LineEndingStylePlugin(gedit.Plugin):
 	UI_KEY = "GeditLineEndingStylePluginUI"
-	
+
 	def __init__(self):
 		gedit.Plugin.__init__(self)
-	
+
 	def activate(self, window):
 		ui = LineEndingStylePluginUI(window)
 		ui.merge()
 		window.set_data(LineEndingStylePlugin.UI_KEY, ui)
-	
+
 	def deactivate(self, window):
 		ui = window.get_data(LineEndingStylePlugin.UI_KEY)
 		window.set_data(LineEndingStylePlugin.UI_KEY, None)
 		ui.unmerge()
-	
+
 	def update_ui(self, window):
 		ui = window.get_data(LineEndingStylePlugin.UI_KEY)
 		ui.update_ui()
