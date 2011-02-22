@@ -167,4 +167,4 @@ class LineEndingStylePlugin(gedit.Plugin):
 		ui = window.get_data(LineEndingStylePlugin.UI_KEY)
 		ui.update_ui()
 
-gtk.glade.bindtextdomain("gedit-line-ending-style-plugin", "/usr/local/stow/dtrebbien-gedit-HEAD/share/locale")
+gtk.glade.bindtextdomain("gedit-line-ending-style-plugin", "/usr/share/locale")
