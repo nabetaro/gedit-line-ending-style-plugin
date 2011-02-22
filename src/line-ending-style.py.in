@@ -24,7 +24,8 @@ import gedit
 import gtk
 import gtk.glade
 
-def N_(message): return message
+def N_(message):
+	return message
 
 GEDIT_DOCUMENT_NEWLINE_TYPE_LF = 0
 GEDIT_DOCUMENT_NEWLINE_TYPE_CR = 1
@@ -42,33 +43,33 @@ class LineEndingStylePluginUI:
 		action_group = self.action_group = gtk.ActionGroup("GeditLineEndingStylePluginActions")
 		action_group.set_translation_domain("gedit-line-ending-style-plugin")
 		action_group.add_actions([
-				("LineEndingStylePluginMenu", None, action_group.translate_string(N_("Line Ending Style")), None, None, None) # `translate_string` is called explicitly due to pygtk bug 627656 (https://bugzilla.gnome.org/show_bug.cgi?id=627656)
-			])
+			("LineEndingStylePluginMenu", None, action_group.translate_string(N_("Line Ending Style")), None, None, None) # `translate_string` is called explicitly due to pygtk bug 627656 (https://bugzilla.gnome.org/show_bug.cgi?id=627656)
+		])
 		action_group.add_radio_actions([
-				("LineEndingStylePluginMenuToLFItem", None, action_group.translate_string(N_("Unix/Linux")), None, action_group.translate_string(N_("Switch to Unix/Linux-style line endings (LF)")), GEDIT_DOCUMENT_NEWLINE_TYPE_LF),
-				("LineEndingStylePluginMenuToCRItem", None, action_group.translate_string(N_("Mac OS Classic")), None, action_group.translate_string(N_("Switch to Mac OS Classic-style line endings (CR)")), GEDIT_DOCUMENT_NEWLINE_TYPE_CR),
-				("LineEndingStylePluginMenuToCRLFItem", None, action_group.translate_string(N_("Windows")), None, action_group.translate_string(N_("Switch to Windows-style line endings (CRLF)")), GEDIT_DOCUMENT_NEWLINE_TYPE_CR_LF)
-			], GEDIT_DOCUMENT_NEWLINE_TYPE_LF, lambda action, current: self.set_active_document_newline_type(action.get_current_value()))
+			("LineEndingStylePluginMenuToLFItem", None, action_group.translate_string(N_("Unix/Linux")), None, action_group.translate_string(N_("Switch to Unix/Linux-style line endings (LF)")), GEDIT_DOCUMENT_NEWLINE_TYPE_LF),
+			("LineEndingStylePluginMenuToCRItem", None, action_group.translate_string(N_("Mac OS Classic")), None, action_group.translate_string(N_("Switch to Mac OS Classic-style line endings (CR)")), GEDIT_DOCUMENT_NEWLINE_TYPE_CR),
+			("LineEndingStylePluginMenuToCRLFItem", None, action_group.translate_string(N_("Windows")), None, action_group.translate_string(N_("Switch to Windows-style line endings (CRLF)")), GEDIT_DOCUMENT_NEWLINE_TYPE_CR_LF)
+		], GEDIT_DOCUMENT_NEWLINE_TYPE_LF, lambda action, current: self.set_active_document_newline_type(action.get_current_value()))
 
 		window = self.window
 		manager = window.get_ui_manager()
 		manager.insert_action_group(action_group, -1)
 		self.merge_id = manager.add_ui_from_string("""
-			<ui>
-				<menubar name="MenuBar">
-					<menu name="FileMenu" action="File">
-						<placeholder name="FileOps_4">
-							<separator />
-							<menu name="LineEndingStylePluginMenu" action="LineEndingStylePluginMenu">
-								<menuitem name="LineEndingStylePluginMenuToLFItem" action="LineEndingStylePluginMenuToLFItem" />
-								<menuitem name="LineEndingStylePluginMenuToCRLFItem" action="LineEndingStylePluginMenuToCRLFItem" />
-								<menuitem name="LineEndingStylePluginMenuToCRItem" action="LineEndingStylePluginMenuToCRItem" />
-							</menu>
-						</placeholder>
-					</menu>
-				</menubar>
-			</ui>
-			""")
+		<ui>
+			<menubar name="MenuBar">
+				<menu name="FileMenu" action="File">
+					<placeholder name="FileOps_4">
+						<separator />
+						<menu name="LineEndingStylePluginMenu" action="LineEndingStylePluginMenu">
+							<menuitem name="LineEndingStylePluginMenuToLFItem" action="LineEndingStylePluginMenuToLFItem" />
+							<menuitem name="LineEndingStylePluginMenuToCRLFItem" action="LineEndingStylePluginMenuToCRLFItem" />
+							<menuitem name="LineEndingStylePluginMenuToCRItem" action="LineEndingStylePluginMenuToCRItem" />
+						</menu>
+					</placeholder>
+				</menu>
+			</menubar>
+		</ui>
+		""")
 
 		statusbar = window.get_statusbar()
 		self.sb_frame = gtk.Frame()
