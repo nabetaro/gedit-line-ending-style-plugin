@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright © 2011 Daniel Trebbien
 # This file is distributed under the same license as the gedit-line-ending-style package.
-
 msgid ""
 msgstr ""
 "Project-Id-Version: gedit-line-ending-style-plugin 0.1\n"
