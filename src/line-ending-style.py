@@ -6,7 +6,7 @@
 # Based in part on the Newline Madness plugin by Jeffery To:
 # http://www.thingsthemselves.com/gedit/
 #
-# Copyright (C) 2010 Daniel Trebbien <dtrebbien@gmail.com>
+# Copyright © 2011 Daniel Trebbien <dtrebbien@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,20 +22,196 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gedit
+import gobject
 import gtk
 import gtk.glade
 
-def N_(message):
-	return message
+try:
+	GeditStatusComboBox = gedit.StatusComboBox
+except:
+	class GeditStatusComboBox(gtk.EventBox):
+		__gproperties__ = {
+					"label": (gobject.TYPE_STRING, "LABEL", "The label", None, gobject.PARAM_READWRITE)
+				}
+
+		__gsignals__ = {
+					"changed": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gtk.MenuItem,))
+				}
+
+		ITEM_TEXT_KEY = "GeditStatusComboBoxItemText"
+		ACTIVATE_HANDLER_ID_KEY = "GeditStatusComboBoxActivateHandlerId"
+
+		def __init__(self, label_text):
+			super(gtk.EventBox, self).__init__()
+
+			self.set_visible_window(True)
+
+			frame = self.frame = gtk.Frame(None)
+			frame.show()
+
+			button = self.button = gtk.ToggleButton()
+			button.set_name("gedit-status-combo-button")
+			button.set_relief(gtk.RELIEF_NONE)
+			button.show()
+
+			self.__set_shadow_type()
+
+			hbox = self.hbox = gtk.HBox(False, 3)
+			hbox.show()
+
+			self.add(frame)
+			frame.add(button)
+			button.add(hbox)
+
+			label = self.label = gtk.Label("")
+			label.show()
+			label.set_single_line_mode(True)
+			label.set_alignment(0.0, 0.5)
+
+			hbox.pack_start(label, False, True, 0)
+
+			item = self.item = gtk.Label("")
+			item.show()
+			item.set_single_line_mode(True)
+			item.set_alignment(0, 0.5)
+
+			hbox.pack_start(item, True, True, 0)
+
+			arrow = self.arrow = gtk.Arrow(gtk.ARROW_DOWN, gtk.SHADOW_NONE)
+			arrow.show()
+			arrow.set_alignment(0.5, 0.5)
+
+			hbox.pack_start(arrow, False, True, 0)
+
+			menu = self.menu = gtk.Menu()
+
+			button.connect("button-press-event", self.__button_press_event)
+			menu.connect("deactivate", self.__menu_deactivate)
+
+			self.set_label(label_text)
+
+		def __set_shadow_type(self):
+			# This is a hack needed to use the shadow type of a statusbar.
+			statusbar = gtk.Statusbar()
+			statusbar.ensure_style()
+
+			shadow_type = statusbar.style_get_property("shadow-type")
+			self.frame.set_shadow_type(shadow_type)
+
+			del statusbar
+
+		def __menu_position_func(self, menu):
+			(request_width, request_height) = menu.get_toplevel().size_request()
+
+			(x, y) = self.window.get_origin()
+
+			if request_width < self.allocation.width:
+				menu.set_size_request(self.allocation.width, -1)
+
+			# Position it above the widget.
+			y -= request_height
+
+			return (x, y, False)
+
+		def __button_press_event(self, widget, event):
+			menu = self.menu
+			(request_width, request_height) = menu.size_request()
+
+			# Do something relative to our own height here. Maybe we can do better.
+			max_height = self.allocation.height * 20
+
+			if request_height > max_height:
+				menu.set_size_request(-1, max_height)
+				menu.get_toplevel().set_size_request(-1, max_height)
+
+			menu.popup(None, None, self.__menu_position_func, event.button, event.time)
+
+			self.button.set_active(True)
+
+			if hasattr(self, "current_item"):
+				self.menu.select_item(self.current_item)
+
+		def __menu_deactivate(self, menu):
+			self.button.set_active(False)
+
+		def do_changed(self, item):
+			text = item.get_data(GeditStatusComboBox.ITEM_TEXT_KEY)
+			if text != None:
+				self.item.set_markup(text)
+				self.current_item = item
+
+		def get_label(self):
+			return self.label.get_label()
+
+		def set_label(self, label_text):
+			if label_text:
+				label_text = "  " + label_text + ": "
+			else:
+				label_text = "  "
+			self.label.set_markup(label_text)
+
+		def add_item(self, item, text):
+			self.menu.append(item)
+
+			self.set_item_text(item, text)
+
+			activate_handler_id = item.connect("activate", lambda item: self.set_item(item))
+			item.set_data(GeditStatusComboBox.ACTIVATE_HANDLER_ID_KEY, activate_handler_id)
+
+		def remove_item(self, item):
+			activate_handler_id = item.get_data(GeditStatusComboBox.ACTIVATE_HANDLER_ID_KEY)
+			item.set_data(GeditStatusComboBox.ACTIVATE_HANDLER_ID_KEY, None)
+			if activate_handler_id != None:
+				item.disconnect(activate_handler_id)
+			item.set_data(GeditStatusComboBox.ITEM_TEXT_KEY, None)
+			self.menu.remove(item)
+
+		def get_items(self):
+			return self.menu.get_children()
+
+		def get_item_text(self, item):
+			return item.get_data(GeditStatusComboBox.ITEM_TEXT_KEY)
+
+		def set_item_text(self, item, text):
+			item.set_data(GeditStatusComboBox.ITEM_TEXT_KEY, text)
+
+		def set_item(self, item):
+			self.emit("changed", item)
+
+		def get_item_label(self):
+			return self.label
+
+		def do_get_property(self, property):
+			if property.name == "label":
+				return self.get_label()
+			else:
+				raise AttributeError, "unknown property %s" % property.name
+
+		def do_set_property(self, property, value):
+			if property.name == "label":
+				self.set_label(value)
+			else:
+				raise AttributeError, "unknown property %s" % property.name
+
+	gobject.type_register(GeditStatusComboBox)
+
+	gtk.rc_parse_string("style \"gedit-status-combo-button-style\"\n" +
+			"{\n"
+			"  GtkWidget::focus-padding = 0\n" +
+			"  GtkWidget::focus-line-width = 0\n" +
+			"  xthickness = 0\n" +
+			"  ythickness = 0\n" +
+			"}\n" +
+			"widget \"*.gedit-status-combo-button\" style \"gedit-status-combo-button-style\"")
+
 
 GEDIT_DOCUMENT_NEWLINE_TYPE_LF = 0
 GEDIT_DOCUMENT_NEWLINE_TYPE_CR = 1
 GEDIT_DOCUMENT_NEWLINE_TYPE_CR_LF = 2
 
-class LineEndingStylePluginUI:
-	PLUGIN_MENU_ITEM_PATH_ROOT = "/ui/MenuBar/FileMenu/FileOps_4/LineEndingStylePluginMenu/"
-
-	NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY = "GeditLineEndingStylePluginUINotifyNewline-TypeHandlerID"
+class LineEndingStylePluginUi:
+	ITEM_VALUE_KEY = "GeditLineEndingStylePluginUiItemValue"
+	NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY = "GeditLineEndingStylePluginUiNotifyNewline-TypeHandlerId"
 
 	def __init__(self, window):
 		self.window = window
@@ -43,82 +219,73 @@ class LineEndingStylePluginUI:
 	def merge(self):
 		action_group = self.action_group = gtk.ActionGroup("GeditLineEndingStylePluginActions")
 		action_group.set_translation_domain("gedit-line-ending-style-plugin")
-		action_group.add_actions([
-			("LineEndingStylePluginMenu", None, action_group.translate_string(N_("Line Ending Style")), None, None, None) # `translate_string` is called explicitly due to pygtk bug 627656 (https://bugzilla.gnome.org/show_bug.cgi?id=627656)
-		])
-		action_group.add_radio_actions([
-			("LineEndingStylePluginMenuToLFItem", None, action_group.translate_string(N_("Unix/Linux")), None, action_group.translate_string(N_("Switch to Unix/Linux-style line endings (LF)")), GEDIT_DOCUMENT_NEWLINE_TYPE_LF),
-			("LineEndingStylePluginMenuToCRItem", None, action_group.translate_string(N_("Mac OS Classic")), None, action_group.translate_string(N_("Switch to Mac OS Classic-style line endings (CR)")), GEDIT_DOCUMENT_NEWLINE_TYPE_CR),
-			("LineEndingStylePluginMenuToCRLFItem", None, action_group.translate_string(N_("Windows")), None, action_group.translate_string(N_("Switch to Windows-style line endings (CRLF)")), GEDIT_DOCUMENT_NEWLINE_TYPE_CR_LF)
-		], GEDIT_DOCUMENT_NEWLINE_TYPE_LF, lambda action, current: self.set_active_document_newline_type(action.get_current_value()))
+		_ = lambda string: action_group.translate_string(string)
 
 		window = self.window
-		manager = window.get_ui_manager()
-		manager.insert_action_group(action_group, -1)
-		self.merge_id = manager.add_ui_from_string("""
-		<ui>
-			<menubar name="MenuBar">
-				<menu name="FileMenu" action="File">
-					<placeholder name="FileOps_4">
-						<separator />
-						<menu name="LineEndingStylePluginMenu" action="LineEndingStylePluginMenu">
-							<menuitem name="LineEndingStylePluginMenuToLFItem" action="LineEndingStylePluginMenuToLFItem" />
-							<menuitem name="LineEndingStylePluginMenuToCRLFItem" action="LineEndingStylePluginMenuToCRLFItem" />
-							<menuitem name="LineEndingStylePluginMenuToCRItem" action="LineEndingStylePluginMenuToCRItem" />
-						</menu>
-					</placeholder>
-				</menu>
-			</menubar>
-		</ui>
-		""")
-
 		statusbar = window.get_statusbar()
-		self.sb_frame = gtk.Frame()
-		self.sb_label = gtk.Label()
-		self.sb_frame.add(self.sb_label)
-		statusbar.pack_end(self.sb_frame, False, False)
-		self.sb_frame.show_all()
+		sb_combo = self.sb_combo = GeditStatusComboBox(None)
+
+		entries = [
+					("LineEndingStylePluginStatusComboToLFItem", "Unix/Linux", "Switch to Unix/Linux-style line endings (LF)",
+							GEDIT_DOCUMENT_NEWLINE_TYPE_LF, "LF"),
+					("LineEndingStylePluginStatusComboToCRItem", "Mac OS Classic", "Switch to Mac OS Classic-style line endings (CR)",
+							GEDIT_DOCUMENT_NEWLINE_TYPE_CR, "CR"),
+					("LineEndingStylePluginStatusComboToCRLFItem", "Windows", "Switch to Windows-style line endings (CRLF)",
+							GEDIT_DOCUMENT_NEWLINE_TYPE_CR_LF, "CRLF")
+				]
+		activate_callback = lambda item: self.set_active_document_newline_type(item.get_data(LineEndingStylePluginUi.ITEM_VALUE_KEY))
+		for entry in entries:
+			action = gtk.Action(entry[0],
+					_(entry[1]),
+					_(entry[2]),
+					None)
+			action_group.add_action(action)
+			item = action.create_menu_item()
+			item.set_data(LineEndingStylePluginUi.ITEM_VALUE_KEY, entry[3])
+			item.connect("activate", activate_callback)
+			sb_combo.add_item(item, _(entry[4]))
+
+		sb_combo.show_all()
+		statusbar.pack_end(sb_combo, False, True)
 
 		doc = window.get_active_document()
 		if doc:
 			self.update_state_per_document(doc)
 
-		self.tab_added_handler_id = window.connect("tab-added", lambda window, tab: self.connect_notify_newline_type_handler(tab.get_document()))
-		self.active_tab_changed_handler_id = window.connect("active-tab-changed", lambda window, tab: self.update_state_per_document(tab.get_document()))
-		self.tab_removed_handler_id = window.connect("tab-removed", lambda window, tab: self.disconnect_notify_newline_type_handler(tab.get_document()))
+		self.tab_added_handler_id = window.connect("tab-added",
+				lambda window, tab: self.connect_notify_newline_type_handler(tab.get_document()))
+		self.active_tab_changed_handler_id = window.connect("active-tab-changed",
+				lambda window, tab: self.update_state_per_document(tab.get_document()))
+		self.tab_removed_handler_id = window.connect("tab-removed",
+				lambda window, tab: self.disconnect_notify_newline_type_handler(tab.get_document()))
 
 		for doc in window.get_documents():
 			self.connect_notify_newline_type_handler(doc)
 
 	def connect_notify_newline_type_handler(self, doc):
 		notify_newline_type_handler_id = doc.connect("notify::newline-type", lambda doc, pspec: self.update_state_per_document(doc))
-		doc.set_data(LineEndingStylePluginUI.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, notify_newline_type_handler_id)
+		doc.set_data(LineEndingStylePluginUi.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, notify_newline_type_handler_id)
 
 	def disconnect_notify_newline_type_handler(self, doc):
-		notify_newline_type_handler_id = doc.get_data(LineEndingStylePluginUI.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY)
-		doc.set_data(LineEndingStylePluginUI.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, None)
+		notify_newline_type_handler_id = doc.get_data(LineEndingStylePluginUi.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY)
+		doc.set_data(LineEndingStylePluginUi.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, None)
 		if notify_newline_type_handler_id != None:
 			doc.disconnect(notify_newline_type_handler_id)
 
 	def update_state_per_document(self, doc):
+		sb_combo = self.sb_combo
+
 		if doc:
 			nl_type = doc.get_property("newline-type")
 
-			next_active_menu_item_name = "LineEndingStylePluginMenuToLFItem"
-			next_sb_label_text = self.action_group.translate_string(N_("LF"))
-			if nl_type == GEDIT_DOCUMENT_NEWLINE_TYPE_CR:
-				next_active_menu_item_name = "LineEndingStylePluginMenuToCRItem"
-				next_sb_label_text = self.action_group.translate_string(N_("CR"))
-			elif nl_type == GEDIT_DOCUMENT_NEWLINE_TYPE_CR_LF:
-				next_active_menu_item_name = "LineEndingStylePluginMenuToCRLFItem"
-				next_sb_label_text = self.action_group.translate_string(N_("CRLF"))
+			for item in sb_combo.get_items():
+				if item.get_data(LineEndingStylePluginUi.ITEM_VALUE_KEY) == nl_type:
+					sb_combo.set_item(item)
+					break
 
-			manager = self.window.get_ui_manager()
-			manager.get_widget(LineEndingStylePluginUI.PLUGIN_MENU_ITEM_PATH_ROOT + next_active_menu_item_name).set_active(True)
-			self.sb_label.set_text(next_sb_label_text)
-			self.sb_label.show()
+			sb_combo.show()
 		else:
-			self.sb_label.hide()
+			sb_combo.hide()
 
 	def set_active_document_newline_type(self, nl_type):
 		doc = self.window.get_active_document()
@@ -127,11 +294,9 @@ class LineEndingStylePluginUI:
 
 	def update_ui(self):
 		doc = self.window.get_active_document()
-		b = doc != None and not doc.get_readonly()
-		manager = self.window.get_ui_manager()
-		manager.get_widget(LineEndingStylePluginUI.PLUGIN_MENU_ITEM_PATH_ROOT + "LineEndingStylePluginMenuToLFItem").set_sensitive(b)
-		manager.get_widget(LineEndingStylePluginUI.PLUGIN_MENU_ITEM_PATH_ROOT + "LineEndingStylePluginMenuToCRItem").set_sensitive(b)
-		manager.get_widget(LineEndingStylePluginUI.PLUGIN_MENU_ITEM_PATH_ROOT + "LineEndingStylePluginMenuToCRLFItem").set_sensitive(b)
+		if doc:
+			b = not doc.get_readonly()
+			self.sb_combo.set_sensitive(b)
 		self.update_state_per_document(doc)
 
 	def unmerge(self):
@@ -141,21 +306,17 @@ class LineEndingStylePluginUI:
 		window.disconnect(self.tab_removed_handler_id); del self.tab_removed_handler_id
 		window.disconnect(self.active_tab_changed_handler_id); del self.active_tab_changed_handler_id
 		window.disconnect(self.tab_added_handler_id); del self.tab_added_handler_id
-		gtk.HBox.remove(window.get_statusbar(), self.sb_frame); del self.sb_frame
-		manager = window.get_ui_manager()
-		manager.remove_ui(self.merge_id); del self.merge_id
-		manager.remove_action_group(self.action_group); del self.action_group
-		manager.ensure_update()
+		gtk.HBox.remove(window.get_statusbar(), self.sb_combo); del self.sb_combo
 		del self.window
 
 class LineEndingStylePlugin(gedit.Plugin):
-	UI_KEY = "GeditLineEndingStylePluginUI"
+	UI_KEY = "GeditLineEndingStylePluginUi"
 
 	def __init__(self):
-		gedit.Plugin.__init__(self)
+		super(gedit.Plugin, self).__init__()
 
 	def activate(self, window):
-		ui = LineEndingStylePluginUI(window)
+		ui = LineEndingStylePluginUi(window)
 		ui.merge()
 		window.set_data(LineEndingStylePlugin.UI_KEY, ui)
 

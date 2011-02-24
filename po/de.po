@@ -1,12 +1,13 @@
-# Copyright (C) 2010 Daniel Trebbien
+# -*- coding: utf-8 -*-
+# Copyright © 2011 Daniel Trebbien
 # This file is distributed under the same license as the gedit-line-ending-style package.
-#
+
 msgid ""
 msgstr ""
 "Project-Id-Version: gedit-line-ending-style-plugin 0.1\n"
 "Report-Msgid-Bugs-To: dtrebbien@gmail.com\n"
 "POT-Creation-Date: 2010-08-21 14:04-0700\n"
-"PO-Revision-Date: 2010-08-21 14:07-0700\n"
+"PO-Revision-Date: 2011-02-24 08:16-0800\n"
 "Last-Translator: Daniel Trebbien <dtrebbien@gmail.com>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -28,11 +29,11 @@ msgstr "Zu Unix/Linux-Zeilenenden wechseln (ZL)"
 
 #: src/line-ending-style.py:48
 msgid "Mac OS Classic"
-msgstr "Mac OS Classic"
+msgstr "Klassisches Mac OS"
 
 #: src/line-ending-style.py:48
 msgid "Switch to Mac OS Classic-style line endings (CR)"
-msgstr "Zu Mac OS Classic-Zeilenenden wechseln (WR)"
+msgstr "Zu klassisches Mac OS-Zeilenenden wechseln (WR)"
 
 #: src/line-ending-style.py:49
 msgid "Windows"
