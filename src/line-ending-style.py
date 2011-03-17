@@ -1,3 +1,4 @@
+# line-ending-style.py generated automatically from line-ending-style.py.in
 # -*- Mode: Python; coding: utf-8; tab-width: 4; indent-tabs-mode: t -*-
 #
 # Line Ending Style, a plugin for Gedit (version 2.29.5 or later)
@@ -153,4 +154,4 @@ class LineEndingStylePlugin(GObject.Object, Gedit.WindowActivatable):
 		ui.update_ui()
 		pass
 
-gettext.bindtextdomain("gedit-line-ending-style-plugin", "@localedir@")
+gettext.bindtextdomain("gedit-line-ending-style-plugin", "/usr/share/locale")
