@@ -1,10 +1,10 @@
 AM_CPPFLAGS = -DLOCALEDIR=\"$(localedir)\"
 LDADD = $(LIBINTL)
 
-EXTRA_DIST = line-ending-style.gedit-plugin line-ending-style.py \
+EXTRA_DIST = line-ending-style.plugin line-ending-style.py \
 	line-ending-style.py.in
 
-plugin_DATA = line-ending-style.gedit-plugin line-ending-style.py
+plugin_DATA = line-ending-style.plugin line-ending-style.py
 
 line-ending-style.py: line-ending-style.py.in Makefile
 	echo '# $(@) generated automatically from $(<)' >$@
