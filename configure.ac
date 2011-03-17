@@ -1,8 +1,8 @@
-AC_INIT([Gedit Line Ending Style plugin], [0.2], [dtrebbien@gmail.com], [gedit-line-ending-style-plugin], [http://code.google.com/p/gedit-line-ending-style-plugin/])
+AC_INIT([Gedit Line Ending Style plugin for GNOME 3], [0.1], [dtrebbien@gmail.com], [gedit-line-ending-style-plugin-for-GNOME-3], [http://code.google.com/p/gedit-line-ending-style-plugin/])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.10 no-define foreign dist-bzip2])
 
-AC_SUBST([plugindir], ['${libdir}/gedit-2/plugins'])
+AC_SUBST([plugindir], ['${libdir}/gedit/plugins'])
 
 AC_PROG_SED
 
