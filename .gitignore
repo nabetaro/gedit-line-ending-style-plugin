@@ -1,6 +1,7 @@
-_old
-_wiki
-autom4te.cache
+/_old*/
+/_ref/
+/_wiki/
+/autom4te.cache/
 aclocal.m4
 config.cache
 config.log

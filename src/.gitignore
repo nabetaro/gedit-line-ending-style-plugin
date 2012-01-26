@@ -1,5 +1,5 @@
-.deps
-.libs
+.deps/
+.libs/
 config.h
 Makefile
 stamp-h1
