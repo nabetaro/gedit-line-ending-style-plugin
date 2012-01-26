@@ -244,6 +244,7 @@ except:
 class LineEndingStylePluginUi:
 	ITEM_VALUE_KEY = "GeditLineEndingStylePluginUiItemValue"
 	NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY = "GeditLineEndingStylePluginUiNotifyNewline-TypeHandlerId"
+	NOTIFY_READ_ONLY_HANDLER_ID_KEY = "GeditLineEndingStylePluginUiNotifyRead-OnlyHandlerId"
 
 	def __init__(self, window):
 		self.window = window
@@ -282,29 +283,43 @@ class LineEndingStylePluginUi:
 
 		doc = window.get_active_document()
 		if doc:
-			self.update_state_per_document(doc)
+			self.__update_state_per_document(doc)
 
 		self.tab_added_handler_id = window.connect("tab-added",
-				lambda window, tab: self.connect_notify_newline_type_handler(tab.get_document()))
+				lambda window, tab: self.__connect_document(tab.get_document()))
 		self.active_tab_changed_handler_id = window.connect("active-tab-changed",
-				lambda window, tab: self.update_state_per_document(tab.get_document()))
+				lambda window, tab: self.__update_state_per_document(tab.get_document()))
 		self.tab_removed_handler_id = window.connect("tab-removed",
-				lambda window, tab: self.disconnect_notify_newline_type_handler(tab.get_document()))
+				lambda window, tab: self.__disconnect_document(tab.get_document()))
 
 		for doc in window.get_documents():
-			self.connect_notify_newline_type_handler(doc)
+			self.__connect_document(doc)
 
-	def connect_notify_newline_type_handler(self, doc):
-		notify_newline_type_handler_id = doc.connect("notify::newline-type", lambda doc, pspec: self.update_state_per_document(doc))
+	def __connect_document(self, doc):
+		"""Connects plugin-specific event handlers."""
+
+		notify_callback = lambda doc, pspec: self.__update_state_per_document(doc)
+
+		notify_newline_type_handler_id = doc.connect("notify::newline-type", notify_callback)
 		doc.set_data(LineEndingStylePluginUi.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, notify_newline_type_handler_id)
 
-	def disconnect_notify_newline_type_handler(self, doc):
+		notify_read_only_handler_id = doc.connect("notify::read-only", notify_callback)
+		doc.set_data(LineEndingStylePluginUi.NOTIFY_READ_ONLY_HANDLER_ID_KEY, notify_read_only_handler_id)
+
+	def __disconnect_document(self, doc):
+		"""Disconnects plugin-specific event handlers."""
+
+		notify_read_only_handler_id = doc.get_data(LineEndingStylePluginUi.NOTIFY_READ_ONLY_HANDLER_ID_KEY)
+		if notify_read_only_handler_id != None:
+			doc.disconnect(notify_read_only_handler_id)
+		doc.set_data(LineEndingStylePluginUi.NOTIFY_READ_ONLY_HANDLER_ID_KEY, None)
+
 		notify_newline_type_handler_id = doc.get_data(LineEndingStylePluginUi.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY)
-		doc.set_data(LineEndingStylePluginUi.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, None)
 		if notify_newline_type_handler_id != None:
 			doc.disconnect(notify_newline_type_handler_id)
+		doc.set_data(LineEndingStylePluginUi.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, None)
 
-	def update_state_per_document(self, doc):
+	def __update_state_per_document(self, doc):
 		sb_combo = self.sb_combo
 
 		if doc:
@@ -316,6 +331,9 @@ class LineEndingStylePluginUi:
 					break
 
 			sb_combo.show()
+
+			b = not doc.get_readonly()
+			sb_combo.set_sensitive(b)
 		else:
 			sb_combo.hide()
 
@@ -327,15 +345,12 @@ class LineEndingStylePluginUi:
 
 	def update_ui(self):
 		doc = self.window.get_active_document()
-		if doc:
-			b = not doc.get_readonly()
-			self.sb_combo.set_sensitive(b)
-		self.update_state_per_document(doc)
+		self.__update_state_per_document(doc)
 
 	def unmerge(self):
 		window = self.window
 		for doc in window.get_documents():
-			self.disconnect_notify_newline_type_handler(doc)
+			self.__disconnect_document(doc)
 		window.disconnect(self.tab_removed_handler_id); del self.tab_removed_handler_id
 		window.disconnect(self.active_tab_changed_handler_id); del self.active_tab_changed_handler_id
 		window.disconnect(self.tab_added_handler_id); del self.tab_added_handler_id
