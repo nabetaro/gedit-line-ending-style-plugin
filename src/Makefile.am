@@ -1,11 +1,11 @@
 AM_CPPFLAGS = -DLOCALEDIR=\"$(localedir)\"
 LDADD = $(LIBINTL)
 
-EXTRA_DIST = line-ending-style.plugin line-ending-style.py \
-	line-ending-style.py.in
+EXTRA_DIST = lineendingstyle.plugin lineendingstyle.py \
+	lineendingstyle.py.in
 
-plugin_DATA = line-ending-style.plugin line-ending-style.py
+plugin_DATA = lineendingstyle.plugin lineendingstyle.py
 
-line-ending-style.py: line-ending-style.py.in Makefile
+lineendingstyle.py: lineendingstyle.py.in Makefile
 	echo '# $(@) generated automatically from $(<)' >$@
 	$(SED) "s/@""localedir@/$(shell echo $(localedir)| $(SED) -e 's/\\/\\\\/g' -e 's/\"/\\\"/g' -e 's/\\/\\\\/g' -e 's/\//\\\//g' -e 's/&/\\\&/g')/g" <$< >>$@

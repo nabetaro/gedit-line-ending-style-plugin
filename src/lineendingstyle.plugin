@@ -1,6 +1,6 @@
 [Plugin]
 Loader=python
-Module=line-ending-style
+Module=lineendingstyle
 IAge=3
 Name=Line Ending Style
 Description=Allows the line ending style of documents to be quickly ascertained and changed

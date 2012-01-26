@@ -188,10 +188,10 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -DLOCALEDIR=\"$(localedir)\"
 LDADD = $(LIBINTL)
-EXTRA_DIST = line-ending-style.plugin line-ending-style.py \
-	line-ending-style.py.in
+EXTRA_DIST = lineendingstyle.plugin lineendingstyle.py \
+	lineendingstyle.py.in
 
-plugin_DATA = line-ending-style.plugin line-ending-style.py
+plugin_DATA = lineendingstyle.plugin lineendingstyle.py
 all: all-am
 
 .SUFFIXES:
@@ -394,7 +394,7 @@ uninstall-am: uninstall-pluginDATA
 	uninstall-am uninstall-pluginDATA
 
 
-line-ending-style.py: line-ending-style.py.in Makefile
+lineendingstyle.py: lineendingstyle.py.in Makefile
 	echo '# $(@) generated automatically from $(<)' >$@
 	$(SED) "s/@""localedir@/$(shell echo $(localedir)| $(SED) -e 's/\\/\\\\/g' -e 's/\"/\\\"/g' -e 's/\\/\\\\/g' -e 's/\//\\\//g' -e 's/&/\\\&/g')/g" <$< >>$@
 
