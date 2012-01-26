@@ -1,4 +1,4 @@
-AC_INIT([Gedit Line Ending Style plugin for GNOME 3], [0.1], [dtrebbien@gmail.com], [gedit-line-ending-style-plugin-for-GNOME-3], [http://code.google.com/p/gedit-line-ending-style-plugin/])
+AC_INIT([Gedit Line Ending Style plugin], [0.1], [dtrebbien@gmail.com], [gedit-line-ending-style-plugin], [https://github.com/dtrebbien/gedit-line-ending-style-plugin/])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.10 no-define foreign dist-bzip2])
 

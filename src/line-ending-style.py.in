@@ -1,11 +1,11 @@
 # -*- Mode: Python; coding: utf-8; tab-width: 4; indent-tabs-mode: t -*-
 #
-# Line Ending Style, a plugin for Gedit (version 2.29.5 or later)
+# Line Ending Style, a plugin for Gedit 3
 #
 # Based in part on the Newline Madness plugin by Jeffery To:
 # http://www.thingsthemselves.com/gedit/
 #
-# Copyright © 2011 Daniel Trebbien <dtrebbien@gmail.com>
+# Copyright © 2012 Daniel Trebbien <dtrebbien@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gettext
-from gi.repository import GObject, Gtk, Gedit, Peas, PeasGtk
+from gi.repository import GObject, Gtk, Gedit
 
 class LineEndingStylePluginUi:
 	ITEM_VALUE_KEY = "GeditLineEndingStylePluginUiItemValue"
