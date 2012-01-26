@@ -21,6 +21,184 @@
 import gettext
 from gi.repository import GObject, Gtk, Gedit
 
+try:
+	GeditStatusComboBox = gedit.StatusComboBox
+except:
+	class GeditStatusComboBox(gtk.EventBox):
+		__gproperties__ = {
+					"label": (gobject.TYPE_STRING, "LABEL", "The label", None, gobject.PARAM_READWRITE)
+				}
+
+		__gsignals__ = {
+					"changed": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gtk.MenuItem,))
+				}
+
+		ITEM_TEXT_KEY = "GeditStatusComboBoxItemText"
+		ACTIVATE_HANDLER_ID_KEY = "GeditStatusComboBoxActivateHandlerId"
+
+		def __init__(self, label_text):
+			super(gtk.EventBox, self).__init__()
+
+			self.set_visible_window(True)
+
+			frame = self.frame = gtk.Frame(None)
+			frame.show()
+
+			button = self.button = gtk.ToggleButton()
+			button.set_name("gedit-status-combo-button")
+			button.set_relief(gtk.RELIEF_NONE)
+			button.show()
+
+			self.__set_shadow_type()
+
+			hbox = self.hbox = gtk.HBox(False, 3)
+			hbox.show()
+
+			self.add(frame)
+			frame.add(button)
+			button.add(hbox)
+
+			label = self.label = gtk.Label("")
+			label.show()
+			label.set_single_line_mode(True)
+			label.set_alignment(0.0, 0.5)
+
+			hbox.pack_start(label, False, True, 0)
+
+			item = self.item = gtk.Label("")
+			item.show()
+			item.set_single_line_mode(True)
+			item.set_alignment(0, 0.5)
+
+			hbox.pack_start(item, True, True, 0)
+
+			arrow = self.arrow = gtk.Arrow(gtk.ARROW_DOWN, gtk.SHADOW_NONE)
+			arrow.show()
+			arrow.set_alignment(0.5, 0.5)
+
+			hbox.pack_start(arrow, False, True, 0)
+
+			menu = self.menu = gtk.Menu()
+
+			button.connect("button-press-event", self.__button_press_event)
+			menu.connect("deactivate", self.__menu_deactivate)
+
+			self.set_label(label_text)
+
+		def __set_shadow_type(self):
+			# This is a hack needed to use the shadow type of a statusbar.
+			statusbar = gtk.Statusbar()
+			statusbar.ensure_style()
+
+			shadow_type = statusbar.style_get_property("shadow-type")
+			self.frame.set_shadow_type(shadow_type)
+
+			del statusbar
+
+		def __menu_position_func(self, menu):
+			(request_width, request_height) = menu.get_toplevel().size_request()
+
+			(x, y) = self.window.get_origin()
+
+			if request_width < self.allocation.width:
+				menu.set_size_request(self.allocation.width, -1)
+
+			# Position it above the widget.
+			y -= request_height
+
+			return (x, y, False)
+
+		def __button_press_event(self, widget, event):
+			menu = self.menu
+			(request_width, request_height) = menu.size_request()
+
+			# Do something relative to our own height here. Maybe we can do better.
+			max_height = self.allocation.height * 20
+
+			if request_height > max_height:
+				menu.set_size_request(-1, max_height)
+				menu.get_toplevel().set_size_request(-1, max_height)
+
+			menu.popup(None, None, self.__menu_position_func, event.button, event.time)
+
+			self.button.set_active(True)
+
+			if hasattr(self, "current_item"):
+				self.menu.select_item(self.current_item)
+
+		def __menu_deactivate(self, menu):
+			self.button.set_active(False)
+
+		def do_changed(self, item):
+			text = item.get_data(GeditStatusComboBox.ITEM_TEXT_KEY)
+			if text != None:
+				self.item.set_markup(text)
+				self.current_item = item
+
+		def get_label(self):
+			return self.label.get_label()
+
+		def set_label(self, label_text):
+			if label_text:
+				label_text = "  " + label_text + ": "
+			else:
+				label_text = "  "
+			self.label.set_markup(label_text)
+
+		def add_item(self, item, text):
+			self.menu.append(item)
+
+			self.set_item_text(item, text)
+
+			activate_handler_id = item.connect("activate", lambda item: self.set_item(item))
+			item.set_data(GeditStatusComboBox.ACTIVATE_HANDLER_ID_KEY, activate_handler_id)
+
+		def remove_item(self, item):
+			activate_handler_id = item.get_data(GeditStatusComboBox.ACTIVATE_HANDLER_ID_KEY)
+			item.set_data(GeditStatusComboBox.ACTIVATE_HANDLER_ID_KEY, None)
+			if activate_handler_id != None:
+				item.disconnect(activate_handler_id)
+			item.set_data(GeditStatusComboBox.ITEM_TEXT_KEY, None)
+			self.menu.remove(item)
+
+		def get_items(self):
+			return self.menu.get_children()
+
+		def get_item_text(self, item):
+			return item.get_data(GeditStatusComboBox.ITEM_TEXT_KEY)
+
+		def set_item_text(self, item, text):
+			item.set_data(GeditStatusComboBox.ITEM_TEXT_KEY, text)
+
+		def set_item(self, item):
+			self.emit("changed", item)
+
+		def get_item_label(self):
+			return self.label
+
+		def do_get_property(self, property):
+			if property.name == "label":
+				return self.get_label()
+			else:
+				raise AttributeError, "unknown property %s" % property.name
+
+		def do_set_property(self, property, value):
+			if property.name == "label":
+				self.set_label(value)
+			else:
+				raise AttributeError, "unknown property %s" % property.name
+
+	gobject.type_register(GeditStatusComboBox)
+
+	gtk.rc_parse_string("style \"gedit-status-combo-button-style\"\n" +
+			"{\n"
+			"  GtkWidget::focus-padding = 0\n" +
+			"  GtkWidget::focus-line-width = 0\n" +
+			"  xthickness = 0\n" +
+			"  ythickness = 0\n" +
+			"}\n" +
+			"widget \"*.gedit-status-combo-button\" style \"gedit-status-combo-button-style\"")
+
 class LineEndingStylePluginUi:
 	ITEM_VALUE_KEY = "GeditLineEndingStylePluginUiItemValue"
 	NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY = "GeditLineEndingStylePluginUiNotifyNewline-TypeHandlerId"
@@ -35,7 +213,7 @@ class LineEndingStylePluginUi:
 
 		window = self.window
 		statusbar = window.get_statusbar()
-		sb_combo = self.sb_combo = Gedit.StatusComboBox.new(None)
+		sb_combo = self.sb_combo = GeditStatusComboBox.new(None)
 
 		entries = [
 					("LineEndingStylePluginStatusComboToLFItem", "Unix/Linux", "Switch to Unix/Linux-style line endings (LF)",
