@@ -321,8 +321,9 @@ class LineEndingStylePluginUi:
 
 	def set_active_document_newline_type(self, nl_type):
 		doc = self.window.get_active_document()
-		if doc:
+		if doc and doc.get_property("newline-type") != nl_type:
 			doc.set_property("newline-type", nl_type)
+			doc.set_modified(True)
 
 	def update_ui(self):
 		doc = self.window.get_active_document()
