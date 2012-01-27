@@ -1,6 +1,26 @@
 ## Introduction
 This is a plugin for Gedit 3 that allows the line ending style of documents to be quickly ascertained and changed. It adds a small, dual-purpose combo box to the status bar which indicates the current document's line ending style and allows it to be changed.
 
+## System-wide installation
+*You will need root privileges.*
+
+ *  Download the v0.1 sources. You can either save & extract GitHub's automatically-generated tarball [`v0.1.tar.gz`](https://github.com/dtrebbien/gedit-line-ending-style-plugin/tarball/v0.1) or clone the repository, verify my GPG signature of the `v0.1` tag, and check out `tags/v0.1`.
+ *  In a terminal, `cd` into the directory containing the v0.1 sources.
+ *  Configure the package. For most systems, the following configure line will work:
+
+    <pre>
+./configure --prefix=/usr
+</pre>
+
+    However, on 64-bit Fedora systems, you will need to override the libdir:
+    
+    <pre>
+./configure --prefix=/usr --libdir=/usr/lib64
+</pre>
+ *  `make && sudo make install`
+
+If users want the plugin enabled, they will need to enable it on the Gedit Preferences dialog.
+
 ## Local installation
 Local installation of the plugin is for when you don't have root access or you only want to install it for yourself.
 
