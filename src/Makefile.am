@@ -1,8 +1,8 @@
 AM_CPPFLAGS = -DLOCALEDIR=\"$(localedir)\"
 LDADD = $(LIBINTL)
 
-EXTRA_DIST = lineendingstyle.plugin lineendingstyle.py \
-	lineendingstyle.py.in
+EXTRA_DIST = lineendingstyle.plugin lineendingstyle.plugin.in \
+	lineendingstyle.py lineendingstyle.py.in
 
 plugin_DATA = lineendingstyle.plugin lineendingstyle.py
 

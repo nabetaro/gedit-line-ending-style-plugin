@@ -7,4 +7,4 @@ Description=Allows the line ending style of documents to be quickly ascertained 
 Authors=Daniel Trebbien <dtrebbien@gmail.com>
 Copyright=Copyright © 2012 Daniel Trebbien
 Website=https://github.com/dtrebbien/gedit-line-ending-style-plugin/
-Version=0.1.1a
+Version=@VERSION@

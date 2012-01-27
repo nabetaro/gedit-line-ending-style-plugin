@@ -35,7 +35,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = src
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/lineendingstyle.plugin.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gettext.m4 \
 	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/lib-ld.m4 \
@@ -45,7 +46,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/gettext.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = lineendingstyle.plugin
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -188,8 +189,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -DLOCALEDIR=\"$(localedir)\"
 LDADD = $(LIBINTL)
-EXTRA_DIST = lineendingstyle.plugin lineendingstyle.py \
-	lineendingstyle.py.in
+EXTRA_DIST = lineendingstyle.plugin lineendingstyle.plugin.in \
+	lineendingstyle.py lineendingstyle.py.in
 
 plugin_DATA = lineendingstyle.plugin lineendingstyle.py
 all: all-am
@@ -225,6 +226,8 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+lineendingstyle.plugin: $(top_builddir)/config.status $(srcdir)/lineendingstyle.plugin.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-pluginDATA: $(plugin_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(plugindir)" || $(MKDIR_P) "$(DESTDIR)$(plugindir)"
