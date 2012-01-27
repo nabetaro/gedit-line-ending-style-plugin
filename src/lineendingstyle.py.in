@@ -113,6 +113,8 @@ except:
 			context = frame.get_style_context()
 			context.add_provider(css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
+			self.set_label(label_text)
+
 		def __del__(self):
 			#print "__del__(): self=", self
 			self.menu.detach()
@@ -203,7 +205,7 @@ except:
 
 		def set_label(self, label_text):
 			if label_text:
-				label_text = "  " + label_text + ": "
+				label_text = "  %s: " % label_text
 			else:
 				label_text = "  "
 			self.label.set_markup(label_text)
