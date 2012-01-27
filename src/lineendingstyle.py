@@ -20,6 +20,7 @@
 
 import gettext
 from gi.repository import GObject, Gdk, Gtk, Gedit
+import weakref
 
 try:
 	GeditStatusComboBox = Gedit.StatusComboBox
@@ -50,6 +51,7 @@ except:
 
 		def __init__(self, label_text):
 			super(Gtk.EventBox, self).__init__()
+			weakself = weakref.ref(self)
 
 			css = self.css = Gtk.CssProvider()
 			css.load_from_data("* {\n" +
@@ -99,11 +101,11 @@ except:
 			hbox.pack_start(arrow, False, True, 0)
 
 			menu = self.menu = Gtk.Menu()
-			menu.attach_to_widget(self, self.__menu_detached)
+			menu.attach_to_widget(self, GeditStatusComboBox.__menu_detached)
 
-			button.connect("button-press-event", self.__button_press_event)
-			button.connect("key-press-event", self.__key_press_event)
-			menu.connect("deactivate", self.__menu_deactivate)
+			button.connect("button-press-event", GeditStatusComboBox.__button_press_event, weakself)
+			button.connect("key-press-event", GeditStatusComboBox.__key_press_event, weakself)
+			menu.connect("deactivate", GeditStatusComboBox.__menu_deactivate, weakself)
 
 			# Make it as small as possible.
 			context = button.get_style_context()
@@ -113,6 +115,7 @@ except:
 			context.add_provider(css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
 		def __del__(self):
+			#print "__del__(): self=", self
 			self.menu.detach()
 
 		def __set_shadow_type(self):
@@ -125,12 +128,28 @@ except:
 			context.get_style_property("shadow-type", shadow_type_val)
 			self.frame.set_shadow_type(shadow_type_val.get_enum())
 
-			del statusbar
-
 		def __menu_detached(self, menu):
 			self.menu = None
 
+		@classmethod
+		def __menu_position_func(cls, menu, push_in, weakcombo):
+			combo = weakcombo()
+			request, _ = menu.get_toplevel().get_preferred_size()
+
+			_, x, y = combo.get_window().get_origin()
+
+			# Make the menu at least as wide as the widget.
+			allocation = combo.get_allocation()
+			if request.width < allocation.width:
+				menu.set_size_request(allocation.width, -1)
+
+			# Position it above the widget.
+			y -= request.height
+
+			return (x, y, False)
+
 		def __show_menu(self, button, time):
+			weakself = weakref.ref(self)
 			menu = self.menu
 			request, _ = menu.get_preferred_size()
 
@@ -142,46 +161,37 @@ except:
 				menu.set_size_request(-1, max_height)
 				menu.get_toplevel().set_size_request(-1, max_height)
 
-			def menu_position_func(menu, push_in, data):
-				request, _ = menu.get_toplevel().get_preferred_size()
-
-				_, x, y = self.get_window().get_origin()
-
-				# Make the menu at least as wide as the widget.
-				allocation = self.get_allocation()
-				if request.width < allocation.width:
-					menu.set_size_request(allocation.width, -1)
-
-				# Position it above the widget.
-				y -= request.height
-
-				return (x, y, False)
-
-			menu.popup(None, None, menu_position_func, None, button, time)
+			menu.popup(None, None, GeditStatusComboBox.__menu_position_func, weakself, button, time)
 
 			self.button.set_active(True)
 
 			if hasattr(self, "current_item"):
 				menu.select_item(self.current_item)
 
-		def __button_press_event(self, widget, event):
+		@classmethod
+		def __button_press_event(cls, widget, event, weakcombo):
+			combo = weakcombo()
 			if event.type == Gdk.EventType.BUTTON_PRESS and event.button == 1:
-				self.__show_menu(event.button, event.time)
+				combo.__show_menu(event.button, event.time)
 				return True
 
 			return False
 
-		def __key_press_event(self, widget, event):
+		@classmethod
+		def __key_press_event(cls, widget, event, weakcombo):
+			combo = weakcombo()
 			if event.keyval == Gdk.KEY_Return or event.keyval == Gdk.KEY_ISO_Enter or \
 					event.keyval == Gdk.KEY_KP_Enter or event.keyval == Gdk.KEY_space or \
 					event.keyval == Gdk.KEY_KP_Space:
-				self.__show_menu(1, event.time)
+				combo.__show_menu(1, event.time)
 				return True
 
 			return False
 
-		def __menu_deactivate(self, menu):
-			self.button.set_active(False)
+		@classmethod
+		def __menu_deactivate(cls, menu, weakcombo):
+			combo = weakcombo()
+			combo.button.set_active(False)
 
 		def do_changed(self, item):
 			text = item.get_data(GeditStatusComboBox.ITEM_TEXT_KEY)
@@ -199,12 +209,18 @@ except:
 				label_text = "  "
 			self.label.set_markup(label_text)
 
+		@classmethod
+		def __item_activate(cls, item, weakcombo):
+			combo = weakcombo()
+			combo.set_item(item)
+
 		def add_item(self, item, text):
+			weakself = weakref.ref(self)
 			self.menu.append(item)
 
 			self.set_item_text(item, text)
 
-			activate_handler_id = item.connect("activate", lambda item: self.set_item(item))
+			activate_handler_id = item.connect("activate", GeditStatusComboBox.__item_activate, weakself)
 			item.set_data(GeditStatusComboBox.ACTIVATE_HANDLER_ID_KEY, activate_handler_id)
 
 		def remove_item(self, item):
@@ -242,13 +258,32 @@ except:
 			else:
 				raise AttributeError, "unknown property %s" % property.name
 
+
+
 class LineEndingStylePluginUi:
 	ITEM_VALUE_KEY = "GeditLineEndingStylePluginUiItemValue"
+	ITEM_ACTIVATE_HANDLER_ID_KEY = "GeditLineEndingStylePluginUiItemActivateHandlerId"
 	NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY = "GeditLineEndingStylePluginUiNotifyNewline-TypeHandlerId"
 	NOTIFY_READ_ONLY_HANDLER_ID_KEY = "GeditLineEndingStylePluginUiNotifyRead-OnlyHandlerId"
 
 	def __init__(self, window):
 		self.window = window
+
+	def __del__(self):
+		#print "__del__(): self=", self
+		pass
+
+	def __tab_added(self, window, tab):
+		self.__connect_document(tab.get_document())
+
+	def __active_tab_changed(self, window, tab):
+		self.__update_state_per_document(tab.get_document())
+
+	def __tab_removed(self, window, tab):
+		self.__disconnect_document(tab.get_document())
+
+	def __activate_item(self, item):
+		self.set_active_document_newline_type(item.get_data(LineEndingStylePluginUi.ITEM_VALUE_KEY))
 
 	def merge(self):
 		action_group = self.action_group = Gtk.ActionGroup("GeditLineEndingStylePluginActions")
@@ -267,7 +302,6 @@ class LineEndingStylePluginUi:
 					("LineEndingStylePluginStatusComboToCRLFItem", "Windows", "Switch to Windows-style line endings (CRLF)",
 							Gedit.DocumentNewlineType.CR_LF, "CRLF")
 				]
-		activate_callback = lambda item: self.set_active_document_newline_type(item.get_data(LineEndingStylePluginUi.ITEM_VALUE_KEY))
 		for entry in entries:
 			action = Gtk.Action(entry[0],
 					_(entry[1]),
@@ -276,7 +310,8 @@ class LineEndingStylePluginUi:
 			action_group.add_action(action)
 			item = action.create_menu_item()
 			item.set_data(LineEndingStylePluginUi.ITEM_VALUE_KEY, entry[3])
-			item.connect("activate", activate_callback)
+			activate_handler_id = item.connect("activate", self.__activate_item)
+			item.set_data(LineEndingStylePluginUi.ITEM_ACTIVATE_HANDLER_ID_KEY, activate_handler_id)
 			sb_combo.add_item(item, _(entry[4]))
 
 		sb_combo.show_all()
@@ -286,25 +321,23 @@ class LineEndingStylePluginUi:
 		if doc:
 			self.__update_state_per_document(doc)
 
-		self.tab_added_handler_id = window.connect("tab-added",
-				lambda window, tab: self.__connect_document(tab.get_document()))
-		self.active_tab_changed_handler_id = window.connect("active-tab-changed",
-				lambda window, tab: self.__update_state_per_document(tab.get_document()))
-		self.tab_removed_handler_id = window.connect("tab-removed",
-				lambda window, tab: self.__disconnect_document(tab.get_document()))
+		self.tab_added_handler_id = window.connect("tab-added", self.__tab_added)
+		self.active_tab_changed_handler_id = window.connect("active-tab-changed", self.__active_tab_changed)
+		self.tab_removed_handler_id = window.connect("tab-removed", self.__tab_removed)
 
 		for doc in window.get_documents():
 			self.__connect_document(doc)
 
+	def __notify_document_property(self, doc, pspec):
+		self.__update_state_per_document(doc)
+
 	def __connect_document(self, doc):
 		"""Connects plugin-specific event handlers."""
 
-		notify_callback = lambda doc, pspec: self.__update_state_per_document(doc)
-
-		notify_newline_type_handler_id = doc.connect("notify::newline-type", notify_callback)
+		notify_newline_type_handler_id = doc.connect("notify::newline-type", self.__notify_document_property)
 		doc.set_data(LineEndingStylePluginUi.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, notify_newline_type_handler_id)
 
-		notify_read_only_handler_id = doc.connect("notify::read-only", notify_callback)
+		notify_read_only_handler_id = doc.connect("notify::read-only", self.__notify_document_property)
 		doc.set_data(LineEndingStylePluginUi.NOTIFY_READ_ONLY_HANDLER_ID_KEY, notify_read_only_handler_id)
 
 	def __disconnect_document(self, doc):
@@ -352,11 +385,20 @@ class LineEndingStylePluginUi:
 		window = self.window
 		for doc in window.get_documents():
 			self.__disconnect_document(doc)
+
 		window.disconnect(self.tab_removed_handler_id); del self.tab_removed_handler_id
 		window.disconnect(self.active_tab_changed_handler_id); del self.active_tab_changed_handler_id
 		window.disconnect(self.tab_added_handler_id); del self.tab_added_handler_id
-		Gtk.HBox.remove(window.get_statusbar(), self.sb_combo); del self.sb_combo
-		del self.window
+
+		sb_combo = self.sb_combo
+		for item in sb_combo.get_items():
+			activate_handler_id = item.get_data(LineEndingStylePluginUi.ITEM_ACTIVATE_HANDLER_ID_KEY)
+			item.disconnect(activate_handler_id)
+			item.set_data(LineEndingStylePluginUi.ITEM_ACTIVATE_HANDLER_ID_KEY, None)
+
+		Gtk.HBox.remove(window.get_statusbar(), sb_combo)
+
+
 
 class LineEndingStylePlugin(GObject.Object, Gedit.WindowActivatable):
 	__gtype_name__ = "LineEndingStylePlugin"
@@ -365,7 +407,8 @@ class LineEndingStylePlugin(GObject.Object, Gedit.WindowActivatable):
 
 	window = GObject.property(type = Gedit.Window)
 
-	def __init__(self):
+	def __del__(self):
+		#print "__del__(): self=", self
 		pass
 
 	def do_activate(self):
@@ -373,19 +416,16 @@ class LineEndingStylePlugin(GObject.Object, Gedit.WindowActivatable):
 		ui = LineEndingStylePluginUi(window)
 		ui.merge()
 		window.set_data(LineEndingStylePlugin.UI_KEY, ui)
-		pass
 
 	def do_deactivate(self):
 		window = self.window
 		ui = window.get_data(LineEndingStylePlugin.UI_KEY)
-		window.set_data(LineEndingStylePlugin.UI_KEY, None)
 		ui.unmerge()
-		pass
+		window.set_data(LineEndingStylePlugin.UI_KEY, None)
 
 	def do_update_state(self):
 		window = self.window
 		ui = window.get_data(LineEndingStylePlugin.UI_KEY)
 		ui.update_ui()
-		pass
 
 gettext.bindtextdomain("gedit-line-ending-style-plugin", "/usr/share/locale")
