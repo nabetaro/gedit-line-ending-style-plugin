@@ -288,18 +288,18 @@ class LineEndingStylePluginUI:
 	def merge(self):
 		action_group = self.action_group = Gtk.ActionGroup("GeditLineEndingStylePluginActions")
 		action_group.set_translation_domain("gedit-line-ending-style-plugin")
-		_ = lambda string: action_group.translate_string(string)
+		_ = lambda s: gettext.dgettext("gedit-line-ending-style-plugin", s)
 
 		window = self.window
 		statusbar = window.get_statusbar()
 		sb_combo = self.sb_combo = GeditStatusComboBox.new(None)
 
 		entries = [
-			("LineEndingStylePluginStatusComboToLFItem", "Unix/Linux", "Switch to Unix/Linux-style line endings (LF)",
+			("GeditLineEndingStylePluginStatusComboToLFItem", "Unix/Linux", "Switch to Unix/Linux-style line endings (LF)",
 					Gedit.DocumentNewlineType.LF, "LF"),
-			("LineEndingStylePluginStatusComboToCRItem", "Mac OS Classic", "Switch to Mac OS Classic-style line endings (CR)",
+			("GeditLineEndingStylePluginStatusComboToCRItem", "Mac OS Classic", "Switch to Mac OS Classic-style line endings (CR)",
 					Gedit.DocumentNewlineType.CR, "CR"),
-			("LineEndingStylePluginStatusComboToCRLFItem", "Windows", "Switch to Windows-style line endings (CRLF)",
+			("GeditLineEndingStylePluginStatusComboToCRLFItem", "Windows", "Switch to Windows-style line endings (CRLF)",
 					Gedit.DocumentNewlineType.CR_LF, "CRLF")
 		]
 		for entry in entries:
