@@ -1,5 +1,5 @@
+# -*- mode: Text; coding: utf-8; buffer-read-only: t -*-
 # lineendingstyle.py generated automatically from lineendingstyle.py.in
-# -*- mode: Python; coding: utf-8; tab-width: 4; indent-tabs-mode: t -*-
 #
 # Line Ending Style, a plugin for Gedit 3
 # Copyright (C) 2012  Daniel Trebbien <dtrebbien@gmail.com>
