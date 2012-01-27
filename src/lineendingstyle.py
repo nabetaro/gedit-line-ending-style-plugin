@@ -1,5 +1,5 @@
 # lineendingstyle.py generated automatically from lineendingstyle.py.in
-# -*- Mode: Python; coding: utf-8; tab-width: 4; indent-tabs-mode: t -*-
+# -*- mode: Python; coding: utf-8; tab-width: 4; indent-tabs-mode: t -*-
 #
 # Line Ending Style, a plugin for Gedit 3
 # Copyright (C) 2012  Daniel Trebbien <dtrebbien@gmail.com>
@@ -43,7 +43,7 @@ except:
 		}
 
 		ITEM_TEXT_KEY = "GeditStatusComboBoxItemText"
-		ACTIVATE_HANDLER_ID_KEY = "GeditStatusComboBoxActivateHandlerId"
+		ACTIVATE_HANDLER_ID_KEY = "GeditStatusComboBoxActivateHandlerID"
 
 		@classmethod
 		def new(cls, label_text):
@@ -260,11 +260,11 @@ except:
 
 
 
-class LineEndingStylePluginUi:
-	ITEM_VALUE_KEY = "GeditLineEndingStylePluginUiItemValue"
-	ITEM_ACTIVATE_HANDLER_ID_KEY = "GeditLineEndingStylePluginUiItemActivateHandlerId"
-	NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY = "GeditLineEndingStylePluginUiNotifyNewline-TypeHandlerId"
-	NOTIFY_READ_ONLY_HANDLER_ID_KEY = "GeditLineEndingStylePluginUiNotifyRead-OnlyHandlerId"
+class LineEndingStylePluginUI:
+	ITEM_VALUE_KEY = "GeditLineEndingStylePluginUIItemValue"
+	ITEM_ACTIVATE_HANDLER_ID_KEY = "GeditLineEndingStylePluginUIItemActivateHandlerID"
+	NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY = "GeditLineEndingStylePluginUINotifyNewline-TypeHandlerID"
+	NOTIFY_READ_ONLY_HANDLER_ID_KEY = "GeditLineEndingStylePluginUINotifyRead-OnlyHandlerID"
 
 	def __init__(self, window):
 		self.window = window
@@ -283,7 +283,7 @@ class LineEndingStylePluginUi:
 		self.__disconnect_document(tab.get_document())
 
 	def __activate_item(self, item):
-		self.set_active_document_newline_type(item.get_data(LineEndingStylePluginUi.ITEM_VALUE_KEY))
+		self.set_active_document_newline_type(item.get_data(LineEndingStylePluginUI.ITEM_VALUE_KEY))
 
 	def merge(self):
 		action_group = self.action_group = Gtk.ActionGroup("GeditLineEndingStylePluginActions")
@@ -295,13 +295,13 @@ class LineEndingStylePluginUi:
 		sb_combo = self.sb_combo = GeditStatusComboBox.new(None)
 
 		entries = [
-					("LineEndingStylePluginStatusComboToLFItem", "Unix/Linux", "Switch to Unix/Linux-style line endings (LF)",
-							Gedit.DocumentNewlineType.LF, "LF"),
-					("LineEndingStylePluginStatusComboToCRItem", "Mac OS Classic", "Switch to Mac OS Classic-style line endings (CR)",
-							Gedit.DocumentNewlineType.CR, "CR"),
-					("LineEndingStylePluginStatusComboToCRLFItem", "Windows", "Switch to Windows-style line endings (CRLF)",
-							Gedit.DocumentNewlineType.CR_LF, "CRLF")
-				]
+			("LineEndingStylePluginStatusComboToLFItem", "Unix/Linux", "Switch to Unix/Linux-style line endings (LF)",
+					Gedit.DocumentNewlineType.LF, "LF"),
+			("LineEndingStylePluginStatusComboToCRItem", "Mac OS Classic", "Switch to Mac OS Classic-style line endings (CR)",
+					Gedit.DocumentNewlineType.CR, "CR"),
+			("LineEndingStylePluginStatusComboToCRLFItem", "Windows", "Switch to Windows-style line endings (CRLF)",
+					Gedit.DocumentNewlineType.CR_LF, "CRLF")
+		]
 		for entry in entries:
 			action = Gtk.Action(entry[0],
 					_(entry[1]),
@@ -309,9 +309,9 @@ class LineEndingStylePluginUi:
 					None)
 			action_group.add_action(action)
 			item = action.create_menu_item()
-			item.set_data(LineEndingStylePluginUi.ITEM_VALUE_KEY, entry[3])
+			item.set_data(LineEndingStylePluginUI.ITEM_VALUE_KEY, entry[3])
 			activate_handler_id = item.connect("activate", self.__activate_item)
-			item.set_data(LineEndingStylePluginUi.ITEM_ACTIVATE_HANDLER_ID_KEY, activate_handler_id)
+			item.set_data(LineEndingStylePluginUI.ITEM_ACTIVATE_HANDLER_ID_KEY, activate_handler_id)
 			sb_combo.add_item(item, _(entry[4]))
 
 		sb_combo.show_all()
@@ -335,23 +335,23 @@ class LineEndingStylePluginUi:
 		"""Connects plugin-specific event handlers."""
 
 		notify_newline_type_handler_id = doc.connect("notify::newline-type", self.__notify_document_property)
-		doc.set_data(LineEndingStylePluginUi.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, notify_newline_type_handler_id)
+		doc.set_data(LineEndingStylePluginUI.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, notify_newline_type_handler_id)
 
 		notify_read_only_handler_id = doc.connect("notify::read-only", self.__notify_document_property)
-		doc.set_data(LineEndingStylePluginUi.NOTIFY_READ_ONLY_HANDLER_ID_KEY, notify_read_only_handler_id)
+		doc.set_data(LineEndingStylePluginUI.NOTIFY_READ_ONLY_HANDLER_ID_KEY, notify_read_only_handler_id)
 
 	def __disconnect_document(self, doc):
 		"""Disconnects plugin-specific event handlers."""
 
-		notify_read_only_handler_id = doc.get_data(LineEndingStylePluginUi.NOTIFY_READ_ONLY_HANDLER_ID_KEY)
+		notify_read_only_handler_id = doc.get_data(LineEndingStylePluginUI.NOTIFY_READ_ONLY_HANDLER_ID_KEY)
 		if notify_read_only_handler_id != None:
 			doc.disconnect(notify_read_only_handler_id)
-		doc.set_data(LineEndingStylePluginUi.NOTIFY_READ_ONLY_HANDLER_ID_KEY, None)
+		doc.set_data(LineEndingStylePluginUI.NOTIFY_READ_ONLY_HANDLER_ID_KEY, None)
 
-		notify_newline_type_handler_id = doc.get_data(LineEndingStylePluginUi.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY)
+		notify_newline_type_handler_id = doc.get_data(LineEndingStylePluginUI.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY)
 		if notify_newline_type_handler_id != None:
 			doc.disconnect(notify_newline_type_handler_id)
-		doc.set_data(LineEndingStylePluginUi.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, None)
+		doc.set_data(LineEndingStylePluginUI.NOTIFY_NEWLINE_TYPE_HANDLER_ID_KEY, None)
 
 	def __update_state_per_document(self, doc):
 		sb_combo = self.sb_combo
@@ -360,7 +360,7 @@ class LineEndingStylePluginUi:
 			nl_type = doc.get_property("newline-type")
 
 			for item in sb_combo.get_items():
-				if item.get_data(LineEndingStylePluginUi.ITEM_VALUE_KEY) == nl_type:
+				if item.get_data(LineEndingStylePluginUI.ITEM_VALUE_KEY) == nl_type:
 					sb_combo.set_item(item)
 					break
 
@@ -392,9 +392,9 @@ class LineEndingStylePluginUi:
 
 		sb_combo = self.sb_combo
 		for item in sb_combo.get_items():
-			activate_handler_id = item.get_data(LineEndingStylePluginUi.ITEM_ACTIVATE_HANDLER_ID_KEY)
+			activate_handler_id = item.get_data(LineEndingStylePluginUI.ITEM_ACTIVATE_HANDLER_ID_KEY)
 			item.disconnect(activate_handler_id)
-			item.set_data(LineEndingStylePluginUi.ITEM_ACTIVATE_HANDLER_ID_KEY, None)
+			item.set_data(LineEndingStylePluginUI.ITEM_ACTIVATE_HANDLER_ID_KEY, None)
 
 		Gtk.HBox.remove(window.get_statusbar(), sb_combo)
 
@@ -403,9 +403,9 @@ class LineEndingStylePluginUi:
 class LineEndingStylePlugin(GObject.Object, Gedit.WindowActivatable):
 	__gtype_name__ = "LineEndingStylePlugin"
 
-	UI_KEY = "GeditLineEndingStylePluginUi"
+	UI_KEY = "GeditLineEndingStylePluginUI"
 
-	window = GObject.property(type = Gedit.Window)
+	window = GObject.property(type=Gedit.Window)
 
 	def __del__(self):
 		#print "__del__(): self=", self
@@ -413,7 +413,7 @@ class LineEndingStylePlugin(GObject.Object, Gedit.WindowActivatable):
 
 	def do_activate(self):
 		window = self.window
-		ui = LineEndingStylePluginUi(window)
+		ui = LineEndingStylePluginUI(window)
 		ui.merge()
 		window.set_data(LineEndingStylePlugin.UI_KEY, ui)
 
