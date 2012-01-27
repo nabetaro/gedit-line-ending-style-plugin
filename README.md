@@ -1,5 +1,7 @@
 ## Introduction
-This is a plugin for Gedit 3 that allows the line ending style of documents to be quickly ascertained and changed. It adds a small, dual-purpose combo box to the status bar which indicates the current document's line ending style and allows it to be changed.
+This is a plugin for Gedit 3 that allows the line ending style of documents to be quickly ascertained and changed. It adds a small, dual-purpose combo box to the status bar which indicates the current document's line ending style and allows it to be changed:
+
+[Screenshot of Gedit Line Ending Style plugin in action](http://i.imgur.com/tI8zh.png)
 
 ## System-wide installation
 *You will need root privileges.*
