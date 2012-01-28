@@ -44,7 +44,7 @@ mkdir --parents ~/.local/share/gedit/plugins
  3. Delete `lineendingstyle.plugin` and `lineendingstyle.py` from `~/.local/share/gedit/plugins`.
 
 ## Notes
- *  It is not currently possible to undo changing the line ending style.
+ *  It is not currently possible to undo changing the line ending style using Ctrl+Z. If you want to change the line ending style back, just change it to the old style of line endings using the combo box in the status bar.
  *  If the current document is read-only, the line ending style combo box is disabled.
  *  The plugin was originally inspired by [Jeffery To](https://github.com/jefferyto)'s Newline Madness plugin for Gedit 2.
 
