@@ -4,7 +4,7 @@ This is a plugin for Gedit 3 that allows the line ending style of documents to b
 [Screenshot of Gedit Line Ending Style plugin in action](http://i.imgur.com/tI8zh.png)
 
 ## System-wide installation
-*You will need root privileges.*
+*You will need root privileges. Alternatively, you can install the plugin for only yourself using the instructions below, in the "Local installation" section.*
 
  *  Download the v0.1 sources. You can either save & extract GitHub's automatically-generated tarball [`v0.1.tar.gz`](https://github.com/dtrebbien/gedit-line-ending-style-plugin/tarball/v0.1) or clone the repository, verify my GPG signature of the `v0.1` tag, and check out `tags/v0.1`.
  *  In a terminal, `cd` into the directory containing the v0.1 sources.
