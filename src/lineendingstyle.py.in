@@ -88,14 +88,18 @@ except:
 			weakself = weakref.ref(self)
 
 			css = self.css = Gtk.CssProvider()
-			css.load_from_data("* {\n" +
-					"  -GtkButton-default-border : 0;\n" +
-					"  -GtkButton-default-outside-border : 0;\n" +
-					"  -GtkButton-inner-border: 0;\n" +
-					"  -GtkWidget-focus-line-width : 0;\n" +
-					"  -GtkWidget-focus-padding : 0;\n" +
-					"  padding: 0;\n" +
-					"}", -1)
+			data = "* {\n" + \
+					"  -GtkButton-default-border : 0;\n" + \
+					"  -GtkButton-default-outside-border : 0;\n" + \
+					"  -GtkButton-inner-border: 0;\n" + \
+					"  -GtkWidget-focus-line-width : 0;\n" + \
+					"  -GtkWidget-focus-padding : 0;\n" + \
+					"  padding: 0;\n" + \
+					"}"
+			try:
+				css.load_from_data(data)
+			except TypeError: # Issue #1
+				css.load_from_data(data, -1)
 
 			self.set_visible_window(True)
 
