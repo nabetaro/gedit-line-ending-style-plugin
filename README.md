@@ -66,3 +66,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </pre>
+
+## Similar projects
+
+ *  [Show and change line endings](http://plugins.netbeans.org/plugin/36810/show-and-change-line-endings) for NetBeans
