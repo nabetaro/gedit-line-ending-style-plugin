@@ -85,7 +85,7 @@ except:
 			return GeditStatusComboBox(label_text)
 
 		def __init__(self, label_text):
-			super(Gtk.EventBox, self).__init__()
+			Gtk.EventBox.__init__(self)
 
 			debug_plugin_message("self=%r", self)
 			weakself = weakref.ref(self)
@@ -451,6 +451,8 @@ class LineEndingStylePlugin(GObject.Object, Gedit.WindowActivatable):
 	window = GObject.property(type=Gedit.Window)
 
 	def __init__(self):
+		GObject.Object.__init__(self)
+
 		debug_plugin_message("self=%r", self)
 
 	def __del__(self):
