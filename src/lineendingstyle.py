@@ -23,37 +23,37 @@ from gi.repository import GObject, Gdk, Gtk, Gedit
 import inspect
 import weakref
 
-DEBUG_PLUGINS = Gedit.DebugSection.DEBUG_PLUGINS
+def get_trace_info(num_back_frames=0):
+	frame = inspect.currentframe().f_back
+	try:
+		for i in range(num_back_frames):
+			frame = frame.f_back
+
+		filename = frame.f_code.co_filename
+
+		# http://code.activestate.com/recipes/145297-grabbing-the-current-line-number-easily/
+		lineno = frame.f_lineno
+
+		func_name = frame.f_code.co_name
+		try:
+			# http://stackoverflow.com/questions/2203424/python-how-to-retrieve-class-information-from-a-frame-object
+			cls_name = frame.f_locals["self"].__class__.__name__
+		except:
+			pass
+		else:
+			func_name = "%s.%s" % (cls_name, func_name)
+
+		return (filename, lineno, func_name)
+	finally:
+		frame = None
 
 # Bug 668924 - Make gedit_debug_message() introspectable <https://bugzilla.gnome.org/show_bug.cgi?id=668924>
 try:
-	debug_message2 = Gedit.debug_message2
-	debug_message = Gedit.debug_message
+	debug_plugin_message = Gedit.debug_plugin_message
 except:
-	def debug_message(section, filename, lineno, func_name, format_str, *args):
-		Gedit.debug(section, filename, lineno, func_name)
-
-def get_filename():
-	return inspect.currentframe().f_back.f_code.co_filename
-
-# http://code.activestate.com/recipes/145297-grabbing-the-current-line-number-easily/
-def get_lineno():
-	"""Returns the line number of the call to get_lineno()."""
-
-	return inspect.currentframe().f_back.f_lineno
-
-# http://stackoverflow.com/questions/2203424/python-how-to-retrieve-class-information-from-a-frame-object
-def get_func_name():
-	caller_frame = inspect.currentframe().f_back
-	try:
-		func_name = caller_frame.f_code.co_name
-		try:
-			class_name = caller_frame.f_locals["self"].__class__.__name__
-			return "%s.%s" % (class_name, func_name)
-		except:
-			return func_name
-	finally:
-		caller_frame = None
+	def debug_plugin_message(format_str, *format_args):
+		filename, lineno, func_name = get_trace_info(1)
+		Gedit.debug(Gedit.DebugSection.DEBUG_PLUGINS, filename, lineno, func_name)
 
 
 
@@ -86,7 +86,8 @@ except:
 
 		def __init__(self, label_text):
 			super(Gtk.EventBox, self).__init__()
-			debug_message(DEBUG_PLUGINS, get_filename(), get_lineno(), get_func_name(), "self=%r" % self)
+
+			debug_plugin_message("self=%r", self)
 			weakself = weakref.ref(self)
 
 			css = self.css = Gtk.CssProvider()
@@ -157,7 +158,7 @@ except:
 			self.set_label(label_text)
 
 		def __del__(self):
-			debug_message(DEBUG_PLUGINS, get_filename(), get_lineno(), get_func_name(), "self=%r" % self)
+			debug_plugin_message("self=%r", self)
 			self.menu.detach()
 
 		def __set_shadow_type(self):
@@ -309,11 +310,11 @@ class LineEndingStylePluginUI:
 	NOTIFY_READ_ONLY_HANDLER_ID_KEY = "GeditLineEndingStylePluginUINotifyRead-OnlyHandlerID"
 
 	def __init__(self, window):
-		debug_message(DEBUG_PLUGINS, get_filename(), get_lineno(), get_func_name(), "self=%r, window=%r" % (self, window))
+		debug_plugin_message("self=%r, window=%r", self, window)
 		self.window = window
 
 	def __del__(self):
-		debug_message(DEBUG_PLUGINS, get_filename(), get_lineno(), get_func_name(), "self=%r" % self)
+		debug_plugin_message("self=%r", self)
 
 	def __tab_added(self, window, tab):
 		self.__connect_document(tab.get_document())
@@ -450,10 +451,10 @@ class LineEndingStylePlugin(GObject.Object, Gedit.WindowActivatable):
 	window = GObject.property(type=Gedit.Window)
 
 	def __init__(self):
-		debug_message(DEBUG_PLUGINS, get_filename(), get_lineno(), get_func_name(), "self=%r" % self)
+		debug_plugin_message("self=%r", self)
 
 	def __del__(self):
-		debug_message(DEBUG_PLUGINS, get_filename(), get_lineno(), get_func_name(), "self=%r" % self)
+		debug_plugin_message("self=%r", self)
 
 	def do_activate(self):
 		window = self.window
